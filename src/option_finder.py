@@ -1,12 +1,8 @@
 import yfinance as yf
 from datetime import datetime, timedelta
 from ticker_filter import get_current_price
-from typing import List, Dict, Union
-
-def find_nearest_expiration(expirations: List[str], target_date: datetime) -> str:
-    target_date = target_date.replace(tzinfo=None)
-    # Convert string dates to datetime only once during comparison
-    return min(expirations, key=lambda exp: abs(datetime.strptime(exp, '%Y-%m-%d') - target_date))
+from typing import Dict, Union
+from utils import find_nearest_expiration
 
 def find_option_strategy(ticker: str, earnings_date: datetime) -> Union[Dict, str]:
     stock = yf.Ticker(ticker)

@@ -3,6 +3,7 @@ import numpy as np
 from datetime import datetime, timedelta
 from scipy.interpolate import interp1d
 import logging
+from utils import get_current_price
 
 logger = logging.getLogger(__name__)
 
@@ -83,11 +84,6 @@ def build_term_structure(days, ivs):
 
     return term_spline
 
-def get_current_price(ticker):
-    todays_data = ticker.history(period='1d')
-    if todays_data.empty:
-        raise ValueError("No market data available for today.")
-    return todays_data['Close'].iloc[0]
 
 def compute_recommendation(tickers):
     if isinstance(tickers, str):
@@ -197,32 +193,31 @@ def compute_recommendation(tickers):
 
             expected_move = round(straddle / underlying_price * 100,2) if straddle else None
 
-            recommendations[ticker] = {'avg_volume': avg_volume >= 1500000, 'iv30_rv30': iv30_rv30 >= 1.25, 'ts_slope_0_45': ts_slope_0_45 <= -0.00406, 'expected_move': expected_move} #Check that they are in our desired range (see video)
+            avg_volume_bool = avg_volume >= 1500000
+            iv30_rv30_bool = iv30_rv30 >= 1.25
+            ts_slope_bool = ts_slope_0_45 <= -0.00406
+
+            if avg_volume_bool and iv30_rv30_bool and ts_slope_bool:
+                recommendations[ticker] = {"Recommendation": "Recommended", "Expected Move": expected_move}
+            elif ts_slope_bool and (avg_volume_bool or iv30_rv30_bool):
+                recommendations[ticker] = {"Recommendation": "Consider", "Expected Move": expected_move}
+            else:
+                recommendations[ticker] = None
+                
         except Exception as e:
             logger.error(f"Error occurred processing {ticker}: {str(e)}")
             recommendations[ticker] = f'Error occurred processing {ticker}: {str(e)}'
     
     return recommendations
-
-def is_recommended(ticker_dict):
-    for ticker, data in ticker_dict.items():
-        avg_volume_bool = data['avg_volume']
-        iv30_rv30_bool = data['iv30_rv30']
-        ts_slope_bool = data['ts_slope_0_45']
-
-        if avg_volume_bool and iv30_rv30_bool and ts_slope_bool:
-            ticker_dict[ticker] = {"Recommendation": "Recommended"}
-        elif ts_slope_bool and (avg_volume_bool or iv30_rv30_bool):
-            ticker_dict[ticker] = {"Recommendation": "Consider"}
+    
+def process_tickers(df):
+    logger.info(f"Processing tickers: {df['Ticker']}")
+    results = compute_recommendation(df['Ticker'])
+    for ticker, result in results.items():
+        if result is None:
+            df = df[df['Ticker'] != ticker]
         else:
-            ticker_dict[ticker] = None
-    
-    return ticker_dict
-    
-def process_tickers(tickers):
-    logger.info(f"Processing tickers: {tickers}")
-    results = compute_recommendation(tickers)
-    recommendations = is_recommended(results)
-    recommendations = {ticker: rec for ticker, rec in recommendations.items() if rec is not None}
-    logger.info(f"Processed recommendations: {recommendations}")
-    return recommendations
+            df.loc[df['Ticker'] == ticker, 'Recommendation'] = result['Recommendation']
+            df.loc[df['Ticker'] == ticker, 'Expected Move'] = result['Expected Move']
+        
+    return df
