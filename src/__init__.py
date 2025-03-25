@@ -1,11 +1,13 @@
-# src/trading_bot/__init__.py
-from .earnings_getter import get_spx_tickers, get_upcoming_earnings
-from .trader import trader, close_all_positions, trade_calendar_spread
-from .option_finder import find_option_strategy
-from .ticker_filter import compute_recommendation, process_tickers
-
 # Optional: configure logging for the package
 import logging
+from logging.handlers import RotatingFileHandler
+
+file_handler = RotatingFileHandler("trading_bot.log", maxBytes=2_000_000, backupCount=5)
+file_handler.setFormatter(
+    logging.Formatter("%(asctime)s [%(levelname)s] %(name)s - %(message)s")
+)
+logging.getLogger().addHandler(file_handler)
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
