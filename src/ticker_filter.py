@@ -1,18 +1,22 @@
 import yfinance as yf
 import numpy as np
-from datetime import datetime, timedelta
+import datetime as dt
 from scipy.interpolate import interp1d
 import logging
-from utils import get_current_price
 
 logger = logging.getLogger(__name__)
 
+def get_current_price(ticker):
+    todays_data = ticker.history(period="1d")
+    if todays_data.empty:
+        raise ValueError("No market data available for today.")
+    return todays_data["Close"].iloc[0]
 
 def filter_dates(dates):
-    today = datetime.today().date()
-    cutoff_date = today + timedelta(days=45)
+    today = dt.datetime.today().date()
+    cutoff_date = today + dt.timedelta(days=45)
 
-    sorted_dates = sorted(datetime.strptime(date, "%Y-%m-%d").date() for date in dates)
+    sorted_dates = sorted(dt.datetime.strptime(date, "%Y-%m-%d").date() for date in dates)
 
     arr = []
     for i, date in enumerate(sorted_dates):
@@ -179,11 +183,11 @@ def compute_recommendation(tickers):
                 )
                 continue
 
-            today = datetime.today().date()
+            today = dt.datetime.today().date()
             dtes = []
             ivs = []
             for exp_date, iv in atm_iv.items():
-                exp_date_obj = datetime.strptime(exp_date, "%Y-%m-%d").date()
+                exp_date_obj = dt.datetime.strptime(exp_date, "%Y-%m-%d").date()
                 days_to_expiry = (exp_date_obj - today).days
                 dtes.append(days_to_expiry)
                 ivs.append(iv)

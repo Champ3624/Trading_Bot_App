@@ -1,0 +1,45 @@
+2025-03-25 15:38:49,031 [INFO] trading_bot.log - Logger is working!
+2025-03-25 15:38:49,032 [INFO] trading_bot.log - Running trade cycle on 2025-03-25 15:38:49
+2025-03-25 15:38:49,032 [INFO] utils - Waiting 370.97 seconds until 2025-03-25 15:45:00-04:00
+2025-03-25 15:45:31,149 [INFO] trading_bot.log - Running trade cycle on 2025-03-25 15:45:31
+2025-03-25 15:45:37,486 [ERROR] yfinance - BRK.B: $BRK.B: possibly delisted; no earnings dates found
+2025-03-25 15:45:38,818 [ERROR] yfinance - BF.B: $BF.B: possibly delisted; no earnings dates found
+2025-03-25 15:46:20,130 [INFO] ticker_filter - Processing tickers: 0    CTAS
+1    DLTR
+2    PAYX
+Name: Ticker, dtype: object
+2025-03-25 15:46:22,678 [ERROR] trading_bot.log - Error fetching today's trades: module 'datetime' has no attribute 'strptime'
+2025-03-25 15:46:22,679 [INFO] trading_bot.log - No trades meet criteria after filtering for overnight earnings events.
+2025-03-25 15:46:22,679 [INFO] utils - Waiting 62917.32 seconds until 2025-03-26 09:15:00-04:00
+2025-03-25 15:47:33,012 [INFO] trading_bot.log - Shutdown signal received. Exiting gracefully.
+2025-03-25 15:53:36,201 [INFO] trading_bot.log - Running trade cycle on 2025-03-25 15:53:36
+2025-03-25 15:53:42,920 [ERROR] yfinance - BRK.B: $BRK.B: possibly delisted; no earnings dates found
+2025-03-25 15:53:44,216 [ERROR] yfinance - BF.B: $BF.B: possibly delisted; no earnings dates found
+2025-03-25 15:54:28,033 [INFO] ticker_filter - Processing tickers: 0    CTAS
+1    DLTR
+2    PAYX
+Name: Ticker, dtype: object
+2025-03-25 15:54:30,436 [ERROR] trading_bot.log - Error fetching today's trades: module 'datetime' has no attribute 'strptime'
+2025-03-25 15:54:30,437 [INFO] trading_bot.log - No trades meet criteria after filtering for overnight earnings events.
+2025-03-25 15:54:30,438 [INFO] utils - Waiting 62429.56 seconds until 2025-03-26 09:15:00-04:00
+2025-03-25 15:55:01,806 [INFO] trading_bot.log - Shutdown signal received. Exiting gracefully.
+2025-03-25 15:56:19,722 [INFO] trading_bot.log - Running trade cycle on 2025-03-25 15:56:19
+2025-03-25 15:56:27,212 [ERROR] yfinance - BRK.B: $BRK.B: possibly delisted; no earnings dates found
+2025-03-25 15:56:28,652 [ERROR] yfinance - BF.B: $BF.B: possibly delisted; no earnings dates found
+2025-03-25 15:57:12,673 [INFO] ticker_filter - Processing tickers: 0    CTAS
+1    DLTR
+2    PAYX
+Name: Ticker, dtype: object
+2025-03-25 15:57:34,498 [INFO] trading_bot.log - Running trade cycle on 2025-03-25 15:57:34
+2025-03-25 15:57:41,524 [ERROR] yfinance - BRK.B: $BRK.B: possibly delisted; no earnings dates found
+2025-03-25 15:57:42,929 [ERROR] yfinance - BF.B: $BF.B: possibly delisted; no earnings dates found
+2025-03-25 15:58:38,824 [INFO] ticker_filter - Processing tickers: 0    CTAS
+1    DLTR
+2    PAYX
+Name: Ticker, dtype: object
+2025-03-25 15:58:41,848 [INFO] trading_bot.log - Placing calendar spread: Long CTAS250502C00205000 | Short CTAS250404C00205000 | Qty: 1
+2025-03-25 15:58:41,978 [INFO] trading_bot.log - Order submitted successfully: {'id': 'a6a862ec-b1fd-479d-99f6-fdd7f258f991', 'client_order_id': '4575443a-6b82-4250-9510-6f3ff917b119', 'created_at': '2025-03-25T19:58:42.140473796Z', 'updated_at': '2025-03-25T19:58:42.143095985Z', 'submitted_at': '2025-03-25T19:58:42.140473796Z', 'filled_at': None, 'expired_at': None, 'canceled_at': None, 'failed_at': None, 'replaced_at': None, 'replaced_by': None, 'replaces': None, 'asset_id': '', 'symbol': '', 'asset_class': '', 'notional': None, 'qty': '1', 'filled_qty': '0', 'filled_avg_price': None, 'order_class': 'mleg', 'order_type': 'limit', 'type': 'limit', 'side': '', 'time_in_force': 'day', 'limit_price': '10', 'stop_price': None, 'status': 'pending_new', 'extended_hours': False, 'legs': [{'id': 'd9af8cd7-dd45-496b-ac3c-b82e3c504110', 'client_order_id': 'ca98b381-4d05-4463-94fb-f98586651f0d', 'created_at': '2025-03-25T19:58:42.140473796Z', 'updated_at': '2025-03-25T19:58:42.143102745Z', 'submitted_at': '2025-03-25T19:58:42.140473796Z', 'filled_at': None, 'expired_at': None, 'canceled_at': None, 'failed_at': None, 'replaced_at': None, 'replaced_by': None, 'replaces': None, 'asset_id': 'bed6dcef-3eba-42d8-be84-d15c7c3a98f2', 'symbol': 'CTAS250502C00205000', 'asset_class': 'us_option', 'notional': None, 'qty': '1', 'filled_qty': '0', 'filled_avg_price': None, 'order_class': 'mleg', 'order_type': 'limit', 'type': 'limit', 'side': 'buy', 'position_intent': 'buy_to_open', 'time_in_force': 'day', 'limit_price': None, 'stop_price': None, 'status': 'pending_new', 'extended_hours': False, 'legs': None, 'trail_percent': None, 'trail_price': None, 'hwm': None, 'subtag': None, 'source': None, 'expires_at': '2025-03-25T20:00:00Z', 'ratio_qty': '1'}, {'id': '148032e0-0dba-4953-9cfb-9b110b34fd64', 'client_order_id': 'a9e7e9f7-017c-4e43-96c6-0312cbf22c3e', 'created_at': '2025-03-25T19:58:42.140473796Z', 'updated_at': '2025-03-25T19:58:42.143115215Z', 'submitted_at': '2025-03-25T19:58:42.140473796Z', 'filled_at': None, 'expired_at': None, 'canceled_at': None, 'failed_at': None, 'replaced_at': None, 'replaced_by': None, 'replaces': None, 'asset_id': 'f8aba111-19b5-400f-ad56-e44d382c0f17', 'symbol': 'CTAS250404C00205000', 'asset_class': 'us_option', 'notional': None, 'qty': '1', 'filled_qty': '0', 'filled_avg_price': None, 'order_class': 'mleg', 'order_type': 'limit', 'type': 'limit', 'side': 'sell', 'position_intent': 'sell_to_open', 'time_in_force': 'day', 'limit_price': None, 'stop_price': None, 'status': 'pending_new', 'extended_hours': False, 'legs': None, 'trail_percent': None, 'trail_price': None, 'hwm': None, 'subtag': None, 'source': None, 'expires_at': '2025-03-25T20:00:00Z', 'ratio_qty': '1'}], 'trail_percent': None, 'trail_price': None, 'hwm': None, 'subtag': None, 'source': None, 'expires_at': '2025-03-25T20:00:00Z'}
+2025-03-25 15:58:42,156 [INFO] trading_bot.log - Placing calendar spread: Long DLTR250502C00067000 | Short DLTR250404C00067000 | Qty: 1
+2025-03-25 15:58:42,300 [INFO] trading_bot.log - Order submitted successfully: {'id': 'd64488df-9fb4-40e5-9906-c4b8afd4ed84', 'client_order_id': 'fac398ec-83e4-4d58-870d-26c58982f13c', 'created_at': '2025-03-25T19:58:42.433661075Z', 'updated_at': '2025-03-25T19:58:42.435463005Z', 'submitted_at': '2025-03-25T19:58:42.433661075Z', 'filled_at': None, 'expired_at': None, 'canceled_at': None, 'failed_at': None, 'replaced_at': None, 'replaced_by': None, 'replaces': None, 'asset_id': '', 'symbol': '', 'asset_class': '', 'notional': None, 'qty': '1', 'filled_qty': '0', 'filled_avg_price': None, 'order_class': 'mleg', 'order_type': 'limit', 'type': 'limit', 'side': '', 'time_in_force': 'day', 'limit_price': '10', 'stop_price': None, 'status': 'pending_new', 'extended_hours': False, 'legs': [{'id': '67460678-981c-4a03-b6af-c8e53fcc3fb3', 'client_order_id': '1acdddb7-dd8d-4d73-a40d-2294ba31fc3e', 'created_at': '2025-03-25T19:58:42.433661075Z', 'updated_at': '2025-03-25T19:58:42.435469965Z', 'submitted_at': '2025-03-25T19:58:42.433661075Z', 'filled_at': None, 'expired_at': None, 'canceled_at': None, 'failed_at': None, 'replaced_at': None, 'replaced_by': None, 'replaces': None, 'asset_id': '251969d4-eb53-4e28-9816-2b5600300cd0', 'symbol': 'DLTR250502C00067000', 'asset_class': 'us_option', 'notional': None, 'qty': '1', 'filled_qty': '0', 'filled_avg_price': None, 'order_class': 'mleg', 'order_type': 'limit', 'type': 'limit', 'side': 'buy', 'position_intent': 'buy_to_open', 'time_in_force': 'day', 'limit_price': None, 'stop_price': None, 'status': 'pending_new', 'extended_hours': False, 'legs': None, 'trail_percent': None, 'trail_price': None, 'hwm': None, 'subtag': None, 'source': None, 'expires_at': '2025-03-25T20:00:00Z', 'ratio_qty': '1'}, {'id': '3e9cbcac-7a42-4adb-b6ca-1ce10fd50d43', 'client_order_id': 'f75e6a48-995d-4118-a065-abb4b4f6da77', 'created_at': '2025-03-25T19:58:42.433661075Z', 'updated_at': '2025-03-25T19:58:42.435481125Z', 'submitted_at': '2025-03-25T19:58:42.433661075Z', 'filled_at': None, 'expired_at': None, 'canceled_at': None, 'failed_at': None, 'replaced_at': None, 'replaced_by': None, 'replaces': None, 'asset_id': '519baaa5-3818-4440-884a-a7560ed58a14', 'symbol': 'DLTR250404C00067000', 'asset_class': 'us_option', 'notional': None, 'qty': '1', 'filled_qty': '0', 'filled_avg_price': None, 'order_class': 'mleg', 'order_type': 'limit', 'type': 'limit', 'side': 'sell', 'position_intent': 'sell_to_open', 'time_in_force': 'day', 'limit_price': None, 'stop_price': None, 'status': 'pending_new', 'extended_hours': False, 'legs': None, 'trail_percent': None, 'trail_price': None, 'hwm': None, 'subtag': None, 'source': None, 'expires_at': '2025-03-25T20:00:00Z', 'ratio_qty': '1'}], 'trail_percent': None, 'trail_price': None, 'hwm': None, 'subtag': None, 'source': None, 'expires_at': '2025-03-25T20:00:00Z'}
+2025-03-25 15:58:42,300 [INFO] utils - Waiting 62177.70 seconds until 2025-03-26 09:15:00-04:00
+2025-03-25 16:00:30,365 [INFO] trading_bot.log - Shutdown signal received. Exiting gracefully.

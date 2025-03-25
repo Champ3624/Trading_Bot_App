@@ -6,9 +6,6 @@ import pytz
 from typing import List
 import pandas as pd
 import datetime
-from earnings_getter import get_upcoming_earnings
-from ticker_filter import process_tickers
-from option_finder import find_option_strategy
 
 eastern = pytz.timezone("America/New_York")
 
@@ -36,34 +33,10 @@ def get_spx_tickers() -> List[str]:
         print(f"Error fetching S&P 500 tickers: {e}")
         return []
 
-
-def get_current_price(ticker):
-    todays_data = ticker.history(period="1d")
-    if todays_data.empty:
-        raise ValueError("No market data available for today.")
-    return todays_data["Close"].iloc[0]
-
-
 def find_nearest_expiration(expirations: List[str], target_date: datetime) -> str:
     target_date = target_date.replace(tzinfo=None)
     # Convert string dates to datetime only once during comparison
     return min(
         expirations,
-        key=lambda exp: abs(datetime.strptime(exp, "%Y-%m-%d") - target_date),
+        key=lambda exp: abs(dt.datetime.strptime(exp, "%Y-%m-%d") - target_date),
     )
-
-
-def get_todays_trades() -> pd.DataFrame:
-    tickers = get_spx_tickers()
-    upcoming = get_upcoming_earnings(tickers)
-    df = process_tickers(upcoming)
-    for index, row in df.iterrows():
-        strat = find_option_strategy(row[0], row[1])
-        if isinstance(strat, str):
-            logger.warning("Skipping %s: %s", row[0], strat)
-            df.drop(index, inplace=True)
-            continue
-        df.at[index, "Short Leg"] = strat["short_call"]
-        df.at[index, "Long Leg"] = strat["long_call"]
-
-    return df[~df["Short Leg"].isnull() & ~df["Long Leg"].isnull()]

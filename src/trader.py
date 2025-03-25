@@ -3,12 +3,17 @@ import datetime as dt
 import json
 import pytz
 import pandas as pd
-from utils import wait_until, get_todays_trades
+from utils import wait_until
 from api_client import AlpacaAPIClient
 import signal
 import sys
+from utils import get_spx_tickers
+from option_finder import find_option_strategy
+from earnings_getter import get_upcoming_earnings
+from ticker_filter import process_tickers
+import __init__
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("trading_bot.log")
 
 with open("config.json", "r") as config_file:
     config = json.load(config_file)
@@ -93,6 +98,21 @@ def close_all_positions() -> None:
     else:
         logger.error("Failed to close positions.")
 
+def get_todays_trades() -> pd.DataFrame:
+    tickers = get_spx_tickers()
+    upcoming = get_upcoming_earnings(tickers)
+    df = process_tickers(upcoming)
+    for index, row in df.iterrows():
+        strat = find_option_strategy(row[0], row[1])
+        if isinstance(strat, str):
+            logger.warning("Skipping %s: %s", row[0], strat)
+            df.drop(index, inplace=True)
+            continue
+        df.at[index, "Short Leg"] = strat["short_call"]
+        df.at[index, "Long Leg"] = strat["long_call"]
+
+    return df[~df["Short Leg"].isnull() & ~df["Long Leg"].isnull()]
+
 
 def trader() -> None:
     """
@@ -131,7 +151,7 @@ def trader() -> None:
         if not trades.empty:
             trades.to_csv("calendar_spreads.csv", index=False)
             for _, row in trades.iterrows():
-                ticker = row["ticker"]
+                ticker = row["Ticker"]
                 short_call = row["Short Leg"]
                 long_call = row["Long Leg"]
                 qty = 1
@@ -154,7 +174,7 @@ def trader() -> None:
             )
 
         # Wait until next trading day at 15 minutes after market open to close positions
-        close_positions_time = next_market_open + dt.timedelta(minutes=15)
+        close_positions_time = next_market_open + dt.timedelta(minutes=45)
         sleep_duration = (
             close_positions_time - dt.datetime.now(eastern)
         ).total_seconds()
