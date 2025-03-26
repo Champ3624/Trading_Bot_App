@@ -81,7 +81,7 @@ def close_all_positions() -> None:
         logger.error("Failed to close positions.")
 
 def get_todays_trades() -> pd.DataFrame:
-    tickers = get_spx_tickers()
+    tickers = config["tickers"]
     upcoming = get_upcoming_earnings(tickers)
     df = process_tickers(upcoming)
     for index, row in df.iterrows():
