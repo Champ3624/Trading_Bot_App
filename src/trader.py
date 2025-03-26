@@ -35,23 +35,6 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 
-def find_option_symbol(symbol, strike, expiration_date):
-    logger.debug(
-        "Searching for option symbol: %s strike %.2f exp %s",
-        symbol,
-        strike,
-        expiration_date,
-    )
-
-    endpoint = f"/options/contracts?underlying_symbols={symbol}&expiration_date={expiration_date}"
-    data = api_client.get(endpoint)
-    if data:
-        for contract in data.get("option_contracts", []):
-            if float(contract["strike_price"]) == strike:
-                return contract["symbol"]
-    return ""
-
-
 def trade_calendar_spread(long_symbol: str, short_symbol: str, qty: int) -> None:
     logger.info(
         "Placing calendar spread: Long %s | Short %s | Qty: %d",
@@ -61,10 +44,9 @@ def trade_calendar_spread(long_symbol: str, short_symbol: str, qty: int) -> None
     )
 
     payload = {
-        "type": "limit",
+        "type": "market",
         "time_in_force": "day",
         "order_class": "mleg",
-        "limit_price": DEFAULT_LIMIT_PRICE,  # Adjust as needed
         "qty": str(qty),
         "legs": [
             {
@@ -103,13 +85,13 @@ def get_todays_trades() -> pd.DataFrame:
     upcoming = get_upcoming_earnings(tickers)
     df = process_tickers(upcoming)
     for index, row in df.iterrows():
-        strat = find_option_strategy(row[0], row[1])
+        strat = find_option_strategy(row[0], row[1], api_client)
         if isinstance(strat, str):
             logger.warning("Skipping %s: %s", row[0], strat)
             df.drop(index, inplace=True)
             continue
-        df.at[index, "Short Leg"] = strat["short_call"]
-        df.at[index, "Long Leg"] = strat["long_call"]
+        df.at[index, "Short Leg"] = strat["near_term"]
+        df.at[index, "Long Leg"] = strat["long_term"]
 
     return df[~df["Short Leg"].isnull() & ~df["Long Leg"].isnull()]
 
@@ -155,13 +137,9 @@ def trader() -> None:
                 short_call = row["Short Leg"]
                 long_call = row["Long Leg"]
                 qty = 1
-
-                short_symbol = find_option_symbol(
-                    ticker, short_call["strike"], short_call["expiry"]
-                )
-                long_symbol = find_option_symbol(
-                    ticker, long_call["strike"], long_call["expiry"]
-                )
+                
+                short_symbol = short_call["symbol"]
+                long_symbol = long_call["symbol"]
 
                 if not short_symbol or not long_symbol:
                     logger.warning("Could not retrieve option symbols for %s", ticker)

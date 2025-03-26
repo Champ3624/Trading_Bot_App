@@ -3,7 +3,9 @@ import yfinance as yf
 import datetime as dt
 from typing import List
 import pytz
+import logging
 
+logger = logging.getLogger("trade_bot.log")
 
 def get_upcoming_earnings(tickers: List[str], days: int = 1) -> pd.DataFrame:
     ticker_earnings = pd.DataFrame(
@@ -54,6 +56,6 @@ def get_upcoming_earnings(tickers: List[str], days: int = 1) -> pd.DataFrame:
                             ignore_index=True,
                         )
         except Exception as e:
-            print(f"Error fetching earnings for {ticker}: {e}")
+            logger.error(f"Error fetching earnings for {ticker}: {e}")
 
     return ticker_earnings

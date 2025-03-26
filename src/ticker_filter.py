@@ -4,7 +4,7 @@ import datetime as dt
 from scipy.interpolate import interp1d
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("trade_bot.log")
 
 def get_current_price(ticker):
     todays_data = ticker.history(period="1d")
