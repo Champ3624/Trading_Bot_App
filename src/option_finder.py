@@ -5,6 +5,7 @@ from typing import Dict, Union
 from utils import find_nearest_expiration
 import logging
 from api_client import AlpacaAPIClient
+import json
 
 logger = logging.getLogger("trade_bot.log")
 logging.basicConfig(level=logging.INFO)
@@ -14,9 +15,9 @@ def find_option_strategy(ticker: str, earnings_date: dt.datetime, client: Alpaca
         logger.info(f"Starting to find option strategy for ticker: {ticker}")
         
         # Fetch expiration dates using Alpaca API
-        expirations = client.get_expirations(ticker)
-        if expirations is None:
-            return None
+        stock = yf.Ticker(ticker)
+        options = stock.options
+        expirations = list(options)
          
         logger.info(f"Fetched expiration dates for {ticker}: {expirations}")
         
