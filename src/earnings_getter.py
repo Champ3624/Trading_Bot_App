@@ -1,61 +1,62 @@
+# Improved earnings_getter.py
 import pandas as pd
 import yfinance as yf
 import datetime as dt
 from typing import List
 import pytz
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
-logger = logging.getLogger("trade_bot.log")
+
+logger = logging.getLogger("trading_bot")
+
 
 def get_upcoming_earnings(tickers: List[str], days: int = 1) -> pd.DataFrame:
-    ticker_earnings = pd.DataFrame(
-        columns=[
-            "Ticker",
-            "Earnings DateTime",
-            "Recommendation",
-            "Expected Move",
-            "Short Leg",
-            "Long Leg",
-        ]
-    )
+    ticker_earnings = (
+        []
+    )  # Store data as a list to avoid expensive DataFrame concatenation
     now = dt.datetime.now(dt.timezone.utc)
     future_limit = now + dt.timedelta(days=days)
     ny_tz = pytz.timezone("America/New_York")
 
-    for ticker in tickers:
+    def fetch_earnings(ticker):
         try:
             stock = yf.Ticker(ticker)
-            # Fetch earnings dates
             dates = stock.earnings_dates.sort_index()
-            if not dates.empty:
-                for earnings_date in dates.index:
-                    earnings_datetime = (
-                        pd.to_datetime(earnings_date)
-                        .tz_convert("UTC")
-                        .astimezone(ny_tz)
-                    )
-                    if now < earnings_datetime < future_limit:
-                        ticker_earnings = pd.concat(
-                            [
-                                ticker_earnings,
-                                pd.DataFrame(
-                                    {
-                                        "Ticker": [ticker],
-                                        "Earnings DateTime": [earnings_datetime],
-                                        "Recommendation": [
-                                            None
-                                        ],  # Placeholder for recommendation
-                                        "Expected Move": [None],
-                                        "Short Leg": [
-                                            None
-                                        ],  # Placeholder for short leg
-                                        "Long Leg": [None],  # Placeholder for long leg
-                                    }
-                                ),
-                            ],
-                            ignore_index=True,
-                        )
+
+            if dates.empty:
+                logger.warning(f"No earnings dates found for {ticker}.")
+                return None
+
+            for earnings_date in dates.index:
+                earnings_datetime = (
+                    pd.to_datetime(earnings_date).tz_convert("UTC").astimezone(ny_tz)
+                )
+                if now < earnings_datetime < future_limit:
+                    return {
+                        "Ticker": ticker,
+                        "Earnings DateTime": earnings_datetime,
+                        "Recommendation": None,
+                        "Expected Move": None,
+                        "Short Leg": None,
+                        "Long Leg": None,
+                    }
         except Exception as e:
             logger.error(f"Error fetching earnings for {ticker}: {e}")
+        return None
 
-    return ticker_earnings
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = {
+            executor.submit(fetch_earnings, ticker): ticker for ticker in tickers
+        }
+        for future in as_completed(futures):
+            result = future.result()
+            if result:
+                ticker_earnings.append(result)
+
+    # Convert the list of dictionaries to a DataFrame
+    df = pd.DataFrame(ticker_earnings)
+    if df.empty:
+        logger.warning("No earnings data retrieved.")
+
+    return df
