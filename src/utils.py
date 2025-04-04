@@ -7,10 +7,15 @@ from typing import List
 import pandas as pd
 import datetime as dt
 import os
+from concurrent.futures import (
+    ThreadPoolExecutor,
+    as_completed,
+)  # TODO: parallel processing
+
 
 eastern = pytz.timezone("America/New_York")
 
-logger = logging.getLogger("trading_bot.log")
+logger = logging.getLogger("trading_bot")
 
 
 def wait_until(target_time):
@@ -34,6 +39,7 @@ def get_spx_tickers() -> List[str]:
         print(f"Error fetching S&P 500 tickers: {e}")
         return []
 
+
 def find_nearest_expiration(expirations: List[str], target_date: dt.datetime) -> str:
     target_date = target_date.replace(tzinfo=None)
     # Convert string dates to datetime only once during comparison
@@ -42,7 +48,10 @@ def find_nearest_expiration(expirations: List[str], target_date: dt.datetime) ->
         key=lambda exp: abs(dt.datetime.strptime(exp, "%Y-%m-%d") - target_date),
     )
 
-def log_trade(ticker, qty, short_symbol, short_call, long_symbol, long_call, recommendation):
+
+def log_trade(
+    ticker, qty, short_symbol, short_call, long_symbol, long_call, recommendation
+):
     log_entry = {
         "timestamp": dt.datetime.now().isoformat(),
         "ticker": ticker,
@@ -58,11 +67,11 @@ def log_trade(ticker, qty, short_symbol, short_call, long_symbol, long_call, rec
         "recommendation": recommendation,
         "status": "Opened",
         "closed_timestamp": "",
-        "pnl": ""
+        "pnl": "",
     }
-    
+
     log_entry["pnl"] = log_entry["pnl"] if log_entry["pnl"] else None
 
     df = pd.DataFrame([log_entry])
     log_file = "trade_log.csv"
-    df.to_csv(log_file, mode='a', index=False, header=not os.path.exists(log_file))
+    df.to_csv(log_file, mode="a", index=False, header=not os.path.exists(log_file))

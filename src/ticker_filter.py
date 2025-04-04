@@ -4,32 +4,40 @@ import datetime as dt
 from scipy.interpolate import interp1d
 import logging
 
-logger = logging.getLogger("trade_bot.log")
+logger = logging.getLogger("trading_bot")
+
 
 def get_current_price(ticker):
-    todays_data = ticker.history(period="1d")
-    if todays_data.empty:
-        raise ValueError("No market data available for today.")
-    return todays_data["Close"].iloc[0]
+    try:
+        todays_data = ticker.history(period="1d")
+        if todays_data.empty:
+            raise ValueError(f"No market data available for today for {ticker.ticker}.")
+        return todays_data["Close"].iloc[0]
+    except Exception as e:
+        logger.error(f"Failed to retrieve current price for {ticker.ticker}: {e}")
+        return None
+
 
 def filter_dates(dates):
-    today = dt.datetime.today().date()
-    cutoff_date = today + dt.timedelta(days=45)
+    try:
+        today = dt.datetime.today().date()
+        cutoff_date = today + dt.timedelta(days=45)
 
-    sorted_dates = sorted(dt.datetime.strptime(date, "%Y-%m-%d").date() for date in dates)
+        sorted_dates = sorted(
+            dt.datetime.strptime(date, "%Y-%m-%d").date() for date in dates
+        )
 
-    arr = []
-    for i, date in enumerate(sorted_dates):
-        if date >= cutoff_date:
-            arr = [d.strftime("%Y-%m-%d") for d in sorted_dates[: i + 1]]
-            break
+        arr = [d.strftime("%Y-%m-%d") for d in sorted_dates if d >= cutoff_date]
 
-    if len(arr) > 0:
-        if arr[0] == today.strftime("%Y-%m-%d"):
-            return arr[1:]
+        if not arr:
+            raise ValueError(
+                "No valid expiration dates found 45 days or more in the future."
+            )
+
         return arr
-
-    raise ValueError("No date 45 days or more in the future found.")
+    except Exception as e:
+        logger.error(f"Error filtering dates: {e}")
+        return []
 
 
 def yang_zhang(price_data, window=30, trading_periods=252, return_last_only=True):
@@ -233,7 +241,7 @@ def process_tickers(df):
     logger.info(f"Processing tickers: {df['Ticker']}")
     results = compute_recommendation(df["Ticker"])
     for ticker, result in results.items():
-        if result is None:
+        if result is None or not isinstance(result, dict):
             df = df[df["Ticker"] != ticker]
         else:
             df.loc[df["Ticker"] == ticker, "Recommendation"] = result["Recommendation"]

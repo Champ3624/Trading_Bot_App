@@ -11,16 +11,6 @@ def exponential_backoff(retry_count):
     return min(60, (2**retry_count) + random.uniform(0, 1))
 
 
-def is_valid_response(response):
-    try:
-        if response and isinstance(response, dict):
-            return True
-        return False
-    except Exception as e:
-        logger.error(f"Error validating response: {e}")
-        return False
-
-
 class AlpacaAPIClient:
     def __init__(self, base_url, api_key, api_secret):
         self.base_url = base_url
@@ -31,17 +21,14 @@ class AlpacaAPIClient:
             "APCA-API-SECRET-KEY": api_secret,
         }
 
-    def get(self, endpoint, params=None, retries=3):
+    def get(self, endpoint, url_part='v2', params=None, retries=3):
         for attempt in range(retries):
             try:
                 response = requests.get(
-                    f"{self.base_url}{endpoint}", headers=self.headers, params=params
+                    f"{self.base_url}/{url_part}/{endpoint}", headers=self.headers, params=params
                 )
                 response.raise_for_status()
-                data = response.json()
-                if is_valid_response(data):
-                    return data
-                logger.error(f"Invalid response structure: {data}")
+                return response.json()
             except requests.RequestException as e:
                 wait_time = exponential_backoff(attempt)
                 logger.warning(
@@ -59,10 +46,7 @@ class AlpacaAPIClient:
                 full_url = f"{base_url}/{url_part}{endpoint}"
                 response = requests.post(full_url, headers=self.headers, json=payload)
                 response.raise_for_status()
-                data = response.json()
-                if is_valid_response(data):
-                    return data
-                logger.error(f"Invalid response structure: {data}")
+                return response.json()
             except requests.RequestException as e:
                 wait_time = exponential_backoff(attempt)
                 logger.warning(
@@ -80,10 +64,7 @@ class AlpacaAPIClient:
                 full_url = f"{base_url}/{url_part}{endpoint}"
                 response = requests.delete(full_url, headers=self.headers)
                 response.raise_for_status()
-                data = response.json()
-                if is_valid_response(data):
-                    return data
-                logger.error(f"Invalid response structure: {data}")
+                return response.json()
             except requests.RequestException as e:
                 wait_time = exponential_backoff(attempt)
                 logger.warning(

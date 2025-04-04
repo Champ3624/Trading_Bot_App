@@ -7,13 +7,12 @@ from utils import wait_until
 from api_client import AlpacaAPIClient
 import signal
 import sys
-from utils import get_spx_tickers
 from option_finder import find_option_strategy
 from earnings_getter import get_upcoming_earnings
 from ticker_filter import process_tickers
 import __init__
 
-logger = logging.getLogger("trading_bot.log")
+logger = logging.getLogger("trading_bot")
 
 with open("config.json", "r") as config_file:
     config = json.load(config_file)
@@ -35,7 +34,7 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 
-def trade_calendar_spread(long_symbol: str, short_symbol: str, qty: int) -> None:
+def trade_calendar_spread(long_symbol: str, short_symbol: str, qty: int = 10) -> None:
     logger.info(
         "Placing calendar spread: Long %s | Short %s | Qty: %d",
         long_symbol,
@@ -73,21 +72,32 @@ def trade_calendar_spread(long_symbol: str, short_symbol: str, qty: int) -> None
         logger.error("Error submitting calendar spread orders: %s", e)
 
 
-def close_all_positions() -> None:
-    result = api_client.delete("/positions")
-    if result is not None:
-        logger.info("All positions closed successfully.")
-    else:
-        logger.error("Failed to close positions.")
+def close_positions(positions=None) -> None:
+    positions = positions if positions is not None else api_client.get("/positions")
+    if positions is None:
+        logger.error("Failed to fetch positions or no positions open.")
+        return
+    for position in positions:
+        symbol = position["symbol"]
 
-def get_todays_trades() -> pd.DataFrame:
+        logger.info("Closing position: %s", symbol)
+
+        try:
+            api_client.delete(f"/positions/{symbol}")
+        except Exception as e:
+            logger.error(
+                "Error closing position for %s or %s: %s", symbol, e
+            )
+
+
+def get_todays_trades(days=1) -> pd.DataFrame:
     tickers = config["tickers"]
-    upcoming = get_upcoming_earnings(tickers)
+    upcoming = get_upcoming_earnings(tickers, days=days)
     df = process_tickers(upcoming)
     for index, row in df.iterrows():
-        strat = find_option_strategy(row[0], row[1], api_client)
+        strat = find_option_strategy(row["Ticker"], row["Earnings Date"], api_client)
         if isinstance(strat, str):
-            logger.warning("Skipping %s: %s", row[0], strat)
+            logger.warning("Skipping %s: %s", row["Ticker"], strat)
             df.drop(index, inplace=True)
             continue
         df.at[index, "Short Leg"] = strat["near_term"]
@@ -131,13 +141,12 @@ def trader() -> None:
             trades = pd.DataFrame()
 
         if not trades.empty:
-            trades.to_csv("calendar_spreads.csv", index=False)
             for _, row in trades.iterrows():
                 ticker = row["Ticker"]
                 short_call = row["Short Leg"]
                 long_call = row["Long Leg"]
                 qty = 1
-                
+
                 short_symbol = short_call["symbol"]
                 long_symbol = long_call["symbol"]
 
@@ -161,7 +170,9 @@ def trader() -> None:
         else:
             logger.warning("Positions closing time already passed, skipping sleep.")
 
-        close_all_positions()
+        # positions = trades[["Short Leg", "Long Leg"]].values.flatten().tolist()
+        # close_positions(positions=positions)
+        close_positions()
 
 
 if __name__ == "__main__":
