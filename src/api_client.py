@@ -21,11 +21,12 @@ class AlpacaAPIClient:
             "APCA-API-SECRET-KEY": api_secret,
         }
 
-    def get(self, endpoint, url_part='v2', params=None, retries=3):
+    def get(self, endpoint, url_part='v2', params=None, retries=3, base="paper"):
+        base_url = self.base_url if base == "paper" else "https://data.alpaca.markets"
         for attempt in range(retries):
             try:
                 response = requests.get(
-                    f"{self.base_url}/{url_part}/{endpoint}", headers=self.headers, params=params
+                    f"{base_url}/{url_part}/{endpoint}", headers=self.headers, params=params
                 )
                 response.raise_for_status()
                 return response.json()
@@ -39,11 +40,10 @@ class AlpacaAPIClient:
                 logger.error(f"Failed to parse JSON response: {e}")
         return None
 
-    def post(self, endpoint, payload, retries=3, url_part="v2", base="paper"):
-        base_url = self.base_url if base == "paper" else "https://data.alpaca.markets"
+    def post(self, endpoint, payload, retries=3, url_part="v2"):
         for attempt in range(retries):
             try:
-                full_url = f"{base_url}/{url_part}{endpoint}"
+                full_url = f"{self.base_url}/{url_part}{endpoint}"
                 response = requests.post(full_url, headers=self.headers, json=payload)
                 response.raise_for_status()
                 return response.json()
@@ -74,3 +74,4 @@ class AlpacaAPIClient:
             except ValueError as e:
                 logger.error(f"Failed to parse JSON response: {e}")
         return None
+    

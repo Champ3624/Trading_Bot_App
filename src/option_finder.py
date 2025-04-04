@@ -4,6 +4,7 @@ import datetime as dt
 from typing import Dict, Union
 from utils import find_nearest_expiration
 import logging
+import json
 from api_client import AlpacaAPIClient
 
 logger = logging.getLogger("trading_bot")
@@ -25,7 +26,7 @@ def find_option_strategy(
             logger.error(f"Error fetching options for {ticker}: {e}")
             return None
 
-        current_price = client.get_asset_price(ticker)
+        current_price = client.get(endpoint='stocks/trades/latest', params={'symbols': ticker}, base='data')['trades'][ticker]['p']
         if current_price is None:
             logger.error(f"Failed to fetch current price for {ticker}.")
             return None
@@ -102,3 +103,24 @@ def find_option_strategy(
     except Exception as e:
         logger.error(f"Error in find_option_strategy for {ticker}: {e}")
         return None
+
+if __name__ == '__main__':
+    # Example usage
+    ticker = "AAPL"
+    earnings_date = dt.datetime.now() + dt.timedelta(days=1)  # Example earnings date
+    
+    with open("config.json", "r") as config_file:
+        config = json.load(config_file)
+    # Assuming the config file contains API_KEY, API_SECRET, and BASE_URL
+    API_KEY = config["api_key"]
+    API_SECRET = config["api_secret"]
+    BASE_URL = config["base_url"]
+    
+    api_client = AlpacaAPIClient(BASE_URL, API_KEY, API_SECRET)
+
+    strategy = find_option_strategy(ticker, earnings_date, api_client)
+    
+    if strategy:
+        print(f"Option strategy for {ticker}: {strategy}")
+    else:
+        print(f"No option strategy found for {ticker}.")

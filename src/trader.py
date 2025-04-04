@@ -3,7 +3,7 @@ import datetime as dt
 import json
 import pytz
 import pandas as pd
-from utils import wait_until
+from utils import wait_until, log_trade
 from api_client import AlpacaAPIClient
 import signal
 import sys
@@ -34,7 +34,7 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 
-def trade_calendar_spread(long_symbol: str, short_symbol: str, qty: int = 10) -> None:
+def trade_calendar_spread(long_symbol: str, short_symbol: str, qty: int = 10):
     logger.info(
         "Placing calendar spread: Long %s | Short %s | Qty: %d",
         long_symbol,
@@ -66,10 +66,13 @@ def trade_calendar_spread(long_symbol: str, short_symbol: str, qty: int = 10) ->
         response = api_client.post(endpoint="/orders", payload=payload)
         if response:
             logger.info("Order submitted successfully: %s", response)
+            return response
         else:
             logger.error("Order submission failed.")
+            return None
     except Exception as e:
         logger.error("Error submitting calendar spread orders: %s", e)
+        return None
 
 
 def close_positions(positions=None) -> None:
@@ -145,7 +148,7 @@ def trader() -> None:
                 ticker = row["Ticker"]
                 short_call = row["Short Leg"]
                 long_call = row["Long Leg"]
-                qty = 1
+                qty = 10 # Default quantity
 
                 short_symbol = short_call["symbol"]
                 long_symbol = long_call["symbol"]
@@ -154,7 +157,18 @@ def trader() -> None:
                     logger.warning("Could not retrieve option symbols for %s", ticker)
                     continue
 
-                trade_calendar_spread(long_symbol, short_symbol, qty)
+                trade_result = trade_calendar_spread(long_symbol=long_symbol, short_symbol=short_symbol, qty=qty)
+                
+                if trade_result:
+                    log_trade(
+                        ticker=ticker,
+                        qty=qty,
+                        long_symbol=long_symbol,
+                        long_call=trade_result['legs'][0],
+                        short_symbol=short_symbol,
+                        short_call=trade_result['legs'][1],
+                        recommendation=row['Recommendation']  # or come from 'df' column
+                    )
         else:
             logger.info(
                 "No trades meet criteria after filtering for overnight earnings events."

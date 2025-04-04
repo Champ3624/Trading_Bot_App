@@ -50,7 +50,13 @@ def find_nearest_expiration(expirations: List[str], target_date: dt.datetime) ->
 
 
 def log_trade(
-    ticker, qty, short_symbol, short_call, long_symbol, long_call, recommendation
+    ticker, 
+    qty, 
+    short_symbol, 
+    short_call, 
+    long_symbol, 
+    long_call, 
+    recommendation
 ):
     log_entry = {
         "timestamp": dt.datetime.now().isoformat(),
@@ -70,8 +76,7 @@ def log_trade(
         "pnl": "",
     }
 
-    log_entry["pnl"] = log_entry["pnl"] if log_entry["pnl"] else None
-
     df = pd.DataFrame([log_entry])
     log_file = "trade_log.csv"
     df.to_csv(log_file, mode="a", index=False, header=not os.path.exists(log_file))
+    logger.info("Trade logged successfully.")
