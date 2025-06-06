@@ -22,10 +22,18 @@ def get_upcoming_earnings(tickers: List[str], days: int = 1) -> pd.DataFrame:
 
     def fetch_earnings(ticker):
         try:
-            stock = yf.Ticker(ticker)
-            dates = stock.earnings_dates.sort_index()
-
-            if dates.empty:
+            # Handle .B suffix stocks by removing it for yfinance
+            yf_ticker = ticker.replace('.B', '-B')
+            stock = yf.Ticker(yf_ticker)
+            
+            try:
+                dates = stock.earnings_dates
+                if dates is None or dates.empty:
+                    logger.warning(f"No earnings dates found for {ticker}.")
+                    return None
+                    
+                dates = dates.sort_index()
+            except (AttributeError, TypeError):
                 logger.warning(f"No earnings dates found for {ticker}.")
                 return None
 
