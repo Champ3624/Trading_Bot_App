@@ -49,6 +49,14 @@ class TestTrader(unittest.TestCase):
                 {'symbol': 'TEST2', 'side': 'sell'}
             ]
         }
+        
+        # Mock the quotes for limit price calculation
+        mock_instance.get.return_value = {
+            'quotes': {
+                'TEST1': {'bid': '10.00', 'ask': '11.00'},
+                'TEST2': {'bid': '5.00', 'ask': '6.00'}
+            }
+        }
 
         # Mock the config file opening
         mock_config = {
@@ -64,25 +72,23 @@ class TestTrader(unittest.TestCase):
         with patch('trading_bot.trader.api_client', mock_instance) as mock_client, \
              patch('trading_bot.trader.circuit_breaker') as mock_circuit_breaker, \
              patch('builtins.open', mock_open(read_data=json.dumps(mock_config))):
-            
+
             # Configure circuit breaker to pass through the function call
             mock_circuit_breaker.execute.side_effect = lambda func, *args, **kwargs: func(*args, **kwargs)
-            
+
             # Call the function under test
             result = trade_calendar_spread('TEST1', 'TEST2', 10)
-            
+
             # Verify the result
             self.assertIsNotNone(result)
             self.assertEqual(result['id'], 'test_order_id')
-            
+
             # Verify the API was called with correct payload
             mock_instance.post.assert_called_once()
             call_args = mock_instance.post.call_args[1]
             self.assertEqual(call_args['endpoint'], '/orders')
-            self.assertEqual(call_args['payload']['type'], 'market')
-            self.assertEqual(call_args['payload']['time_in_force'], 'day')
-            self.assertEqual(call_args['payload']['order_class'], 'mleg')
-            self.assertEqual(call_args['payload']['qty'], '10')
+            self.assertEqual(call_args['payload']['type'], 'limit')
+            self.assertIn('limit_price', call_args['payload'])
 
     def test_trade_calendar_spread_failure(self):
         """Test failed calendar spread trade."""

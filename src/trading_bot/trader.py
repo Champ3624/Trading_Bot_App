@@ -88,8 +88,38 @@ def validate_trade_params(long_symbol: str, short_symbol: str, qty: int) -> bool
         return False
     return True
 
+def calculate_limit_price(long_symbol: str, short_symbol: str) -> float:
+    """
+    Calculate a good limit price for the calendar spread based on the mid-price of the long and short legs.
+    
+    Args:
+        long_symbol: Symbol for the long leg
+        short_symbol: Symbol for the short leg
+        
+    Returns:
+        float: The calculated limit price
+    """
+    try:
+        long_quote = api_client.get(endpoint=f"/options/quotes/latest", params={"symbols": long_symbol}, base="data")
+        short_quote = api_client.get(endpoint=f"/options/quotes/latest", params={"symbols": short_symbol}, base="data")
+        
+        if not long_quote or not short_quote:
+            logger.error("Failed to fetch quotes for limit price calculation.")
+            return DEFAULT_LIMIT_PRICE
+        
+        long_mid = (float(long_quote["quotes"][long_symbol]["bid"]) + float(long_quote["quotes"][long_symbol]["ask"])) / 2
+        short_mid = (float(short_quote["quotes"][short_symbol]["bid"]) + float(short_quote["quotes"][short_symbol]["ask"])) / 2
+        
+        # The limit price is the difference between the long and short mid-prices
+        limit_price = long_mid - short_mid
+        logger.info(f"Calculated limit price: {limit_price:.2f}")
+        return limit_price
+    except Exception as e:
+        logger.error(f"Error calculating limit price: {e}")
+        return DEFAULT_LIMIT_PRICE
+
 @add_retry_logic
-def trade_calendar_spread(long_symbol: str, short_symbol: str, qty: int = 10) -> Optional[Dict[str, Any]]:
+def trade_calendar_spread(long_symbol: str, short_symbol: str, qty: int = 10, limit_price: float = None) -> Optional[Dict[str, Any]]:
     """
     Place a calendar spread trade.
     
@@ -97,6 +127,7 @@ def trade_calendar_spread(long_symbol: str, short_symbol: str, qty: int = 10) ->
         long_symbol: Symbol for the long leg
         short_symbol: Symbol for the short leg
         qty: Quantity of contracts
+        limit_price: Limit price for the trade (defaults to calculated value)
         
     Returns:
         Dict containing order details if successful, None otherwise
@@ -104,15 +135,20 @@ def trade_calendar_spread(long_symbol: str, short_symbol: str, qty: int = 10) ->
     if not validate_trade_params(long_symbol, short_symbol, qty):
         return None
 
+    if limit_price is None:
+        limit_price = calculate_limit_price(long_symbol, short_symbol)
+
     logger.info(
-        "Placing calendar spread: Long %s | Short %s | Qty: %d",
+        "Placing calendar spread: Long %s | Short %s | Qty: %d | Limit Price: %.2f",
         long_symbol,
         short_symbol,
         qty,
+        limit_price,
     )
 
     payload = {
-        "type": "market",
+        "type": "limit",
+        "limit_price": str(limit_price),
         "time_in_force": "day",
         "order_class": "mleg",
         "qty": str(qty),
