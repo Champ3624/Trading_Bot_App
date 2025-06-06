@@ -1,32 +1,41 @@
-import setuptools
+from setuptools import setup, find_packages
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
-setuptools.setup(
-    name="trading_bot",
+with open("requirements.txt", "r", encoding="utf-8") as fh:
+    requirements = fh.read().splitlines()
+
+setup(
+    name="trading-bot",
     version="0.1.0",
-    author="Chuckie Sultan",
-    author_email="championman5@gmail.com",
-    description="A trading bot using Alpaca Trade API running on AWS EC2",
+    author="Your Name",
+    author_email="your.email@example.com",
+    description="A trading bot for calendar spread strategy",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/Champ3624/Trading_Bot_App",
-    packages=setuptools.find_packages(where="src"),
+    url="https://github.com/yourusername/trading-bot",
+    packages=find_packages(where="src"),
     package_dir={"": "src"},
     classifiers=[
-        "Programming Language :: Python :: 3",
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Financial and Insurance Industry",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Topic :: Office/Business :: Financial :: Investment",
     ],
-    python_requires=">=3.6",
-    install_requires=[
-        "numpy==1.21.6",
-        "pandas==2.0.1",
-        "pytz==2025.1",
-        "requests==2.32.3",
-        "scipy==1.15.2",
-        "setuptools==75.8.0",
-        "yfinance==0.2.55",
-    ],
-)
+    python_requires=">=3.8",
+    install_requires=requirements,
+    entry_points={
+        "console_scripts": [
+            "trading-bot=trading_bot.run:main",
+        ],
+    },
+    include_package_data=True,
+    package_data={
+        "trading_bot": ["templates/*"],
+    },
+) 

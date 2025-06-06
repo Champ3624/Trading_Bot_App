@@ -2,10 +2,10 @@
 import yfinance as yf
 import datetime as dt
 from typing import Dict, Union
-from utils import find_nearest_expiration
+from .utils import find_nearest_expiration
 import logging
 import json
-from api_client import AlpacaAPIClient
+from .api_client import AlpacaAPIClient
 
 logger = logging.getLogger("trading_bot")
 

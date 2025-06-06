@@ -10,13 +10,12 @@ import sys
 from trading_bot.option_finder import find_option_strategy
 from trading_bot.earnings_getter import get_upcoming_earnings
 from trading_bot.ticker_filter import process_tickers
-from . import __init__
+from trading_bot import __version__
 import functools
 import time
 from typing import Optional, Dict, Any, List
 from trading_bot.circuit_breaker import CircuitBreaker
 from trading_bot.logging_config import setup_logging
-from trading_bot.monitoring import Monitoring
 
 # Setup logging
 logger = setup_logging()
@@ -49,9 +48,6 @@ DEFAULT_LIMIT_PRICE = config["default_limit_price"]
 # Initialize API client with circuit breaker
 api_client = AlpacaAPIClient(BASE_URL, API_KEY, API_SECRET)
 circuit_breaker = CircuitBreaker()
-
-# Initialize monitoring
-monitor = Monitoring(config)
 
 eastern = pytz.timezone("America/New_York")
 
@@ -106,7 +102,6 @@ def trade_calendar_spread(long_symbol: str, short_symbol: str, qty: int = 10) ->
         Dict containing order details if successful, None otherwise
     """
     if not validate_trade_params(long_symbol, short_symbol, qty):
-        monitor.alert_error(f"Invalid trade parameters: {long_symbol}, {short_symbol}, {qty}")
         return None
 
     logger.info(
@@ -141,22 +136,12 @@ def trade_calendar_spread(long_symbol: str, short_symbol: str, qty: int = 10) ->
         response = api_client.post(endpoint="/orders", payload=payload)
         if response:
             logger.info("Order submitted successfully: %s", response)
-            monitor.alert_trade({
-                'symbol': f"{long_symbol}/{short_symbol}",
-                'type': 'calendar_spread',
-                'qty': qty,
-                'price': response.get('filled_avg_price', 'N/A')
-            })
             return response
         else:
-            error_msg = "Order submission failed."
-            logger.error(error_msg)
-            monitor.alert_error(error_msg)
+            logger.error("Order submission failed.")
             return None
     except Exception as e:
-        error_msg = f"Error submitting calendar spread orders: {str(e)}"
-        logger.error(error_msg)
-        monitor.alert_error(error_msg)
+        logger.error("Error submitting calendar spread orders: %s", e)
         return None
 
 @add_retry_logic
@@ -246,10 +231,6 @@ def trader() -> None:
             now = dt.datetime.now(eastern)
             logger.info("Running trade cycle on %s", now.strftime("%Y-%m-%d %H:%M:%S"))
 
-            # Check system health
-            health_data = monitor.check_system_health()
-            monitor.log_health_metrics(health_data)
-
             # Assume market close at 16:00 local time
             market_close = eastern.localize(
                 dt.datetime(now.year, now.month, now.day, MARKET_CLOSE_TIME)
@@ -310,13 +291,8 @@ def trader() -> None:
 
             close_positions()
             
-            # Monitor trading performance
-            monitor.monitor_trading_performance(get_trade_history())
-            
         except Exception as e:
-            error_msg = f"Error in main trading loop: {str(e)}"
-            logger.error(error_msg)
-            monitor.alert_error(error_msg)
+            logger.error(f"Error in main trading loop: {str(e)}")
             time.sleep(60)  # Wait a minute before retrying
 
 if __name__ == "__main__":

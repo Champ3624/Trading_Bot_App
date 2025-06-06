@@ -1,0 +1,9 @@
+services:
+  trading-bot:
+    build: .
+    volumes:
+      - ./logs:/app/logs
+      - ./config.json:/app/config.json
+    environment:
+      - TZ=America/New_York
+    restart: unless-stopped 

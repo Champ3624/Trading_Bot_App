@@ -633,3 +633,17 @@ Name: Ticker, dtype: object
 2025-04-04 10:17:36,902 [INFO] trading_bot - Waiting 20.00 seconds until 2025-04-04 10:17:56.902615-04:00
 2025-04-04 10:17:57,041 [INFO] trading_bot - Closing position: LW250417C00055000
 2025-04-04 10:17:57,302 [INFO] trading_bot - Closing position: LW250516C00055000
+2025-04-08 14:37:50,619 [ERROR] trading_bot - Error fetching earnings for BRK.B: 'NoneType' object has no attribute 'sort_index'
+2025-04-08 14:37:50,844 [ERROR] trading_bot - Error fetching earnings for BF.B: 'NoneType' object has no attribute 'sort_index'
+2025-04-08 14:37:55,150 [INFO] trading_bot - Processing tickers: 0    DAL
+Name: Ticker, dtype: object
+2025-04-08 14:37:56,180 [ERROR] trading_bot - Error occurred processing DAL: float division by zero
+2025-04-08 14:43:11,412 [ERROR] trading_bot - Error fetching earnings for BRK.B: 'NoneType' object has no attribute 'sort_index'
+2025-04-08 14:43:11,619 [ERROR] trading_bot - Error fetching earnings for BF.B: 'NoneType' object has no attribute 'sort_index'
+2025-04-08 14:43:15,755 [INFO] trading_bot - Processing tickers: 0    DAL
+Name: Ticker, dtype: object
+2025-06-06 14:53:23,752 [INFO] trading_bot - Running trade cycle on 2025-06-06 14:53:23
+2025-06-06 14:53:24,763 [INFO] trading_bot - Waiting 3095.24 seconds until 2025-06-06 15:45:00-04:00
+2025-06-06 14:53:51,534 [INFO] trading_bot - Shutdown signal received. Exiting gracefully.
+2025-06-06 14:55:59,691 [INFO] trading_bot - Running trade cycle on 2025-06-06 14:55:59
+2025-06-06 14:55:59,693 [INFO] trading_bot - Waiting 2940.31 seconds until 2025-06-06 15:45:00-04:00

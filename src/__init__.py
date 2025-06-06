@@ -1,3 +1,9 @@
+"""
+Trading Bot Package
+"""
+
+__version__ = "0.1.0"
+
 # __init__.py
 import logging
 from logging.handlers import RotatingFileHandler

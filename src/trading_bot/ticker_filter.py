@@ -4,8 +4,8 @@ import datetime as dt
 from datetime import datetime, timedelta
 from scipy.interpolate import interp1d
 import logging
-from utils import get_spx_tickers
-from earnings_getter import get_upcoming_earnings
+from trading_bot.utils import get_spx_tickers
+from trading_bot.earnings_getter import get_upcoming_earnings
 
 logger = logging.getLogger("trading_bot")
 logger.setLevel(logging.INFO)

@@ -1,7 +1,7 @@
 {
     "base_url": "https://paper-api.alpaca.markets",
-    "api_key": "PK8Q8U1KR5K8VYCG1WFZ",
-    "api_secret": "jcRDo4yvItEYvxYY0el2K7QjLmFrSWNpn48xFIRw",
+    "api_key": "PKR2WNOF6SYM7A5NIZKK",
+    "api_secret": "nPoRXz6eTB1YnromCAaAvgNcKgy8kLRqg400wEgS",
     "market_close_time": 16,
     "market_open_time": 9,
     "default_limit_price": 10,

@@ -6,6 +6,7 @@ from typing import List
 import pytz
 import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from trading_bot.utils import get_spx_tickers
 
 
 logger = logging.getLogger("trading_bot")
@@ -60,3 +61,10 @@ def get_upcoming_earnings(tickers: List[str], days: int = 1) -> pd.DataFrame:
         logger.warning("No earnings data retrieved.")
 
     return df
+
+
+if __name__ == '__main__':
+    # Example usage
+    tickers = get_spx_tickers()  # Fetch S&P 500 tickers
+    earnings_data = get_upcoming_earnings(tickers, days=1)
+    print(earnings_data)

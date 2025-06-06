@@ -80,3 +80,24 @@ def log_trade(
     log_file = "trade_log.csv"
     df.to_csv(log_file, mode="a", index=False, header=not os.path.exists(log_file))
     logger.info("Trade logged successfully.")
+    
+def update_log(
+    ticker, 
+    qty, 
+    short_symbol, 
+    short_closed, 
+    long_symbol, 
+    long_closed, 
+    
+):
+    log_file = "trade_log.csv"
+    if os.path.exists(log_file):
+        df = pd.read_csv(log_file)
+        df["closed_timestamp"] = dt.datetime.now().isoformat()
+        df["pnl"] = df.apply(
+            lambda row: (row["long_price"] - row["short_price"]) * row["qty"], axis=1
+        )
+        df.to_csv(log_file, index=False)
+        logger.info("Trade log updated successfully.")
+    else:
+        logger.warning("Trade log file does not exist.")
